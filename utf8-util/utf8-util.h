@@ -5,15 +5,14 @@
 
 namespace utf8
 {
-    typedef std::uint32_t Codepoint_t;
-
     bool isValidUTF8 (const char* str);
 
     namespace impl
     {
-        int processLeading (char c, Codepoint_t& initialcp);
-        bool addContinuation (char c, Codepoint_t& cp);
-
+        int processLeading (char c, char32_t& initialcp);
+        bool addContinuation (char c, char32_t& cp);
+        int countContinuations (char c);
+        bool isContinuation (char c);
 
         template <typename container_t>
         class CodepointIteratorImpl
@@ -22,7 +21,7 @@ namespace utf8
                 const container_t& m_container;
 
             public:
-                typedef Codepoint_t value_typex;
+                typedef char32_t value_typex;
 
                 class iterator_impl
                 {
@@ -34,7 +33,7 @@ namespace utf8
 
                         value_typex operator* ()
                         {
-                            Codepoint_t cp = 0;
+                            char32_t cp = 0;
                             int ncont = impl::processLeading(*m_itr, cp);
                             while (ncont)
                             {
@@ -88,5 +87,35 @@ namespace utf8
     inline impl::CodepointIteratorImpl<container_t> CodepointIterator (const container_t& c)
     {
         return impl::CodepointIteratorImpl<container_t>(c);
+    }
+
+    template <typename iterator_t>
+    bool isValidUTF8 (iterator_t begin, iterator_t end)
+    {
+        while (begin != end)
+        {
+            int cc = impl::countContinuations(*begin);
+            if (cc < 0)
+                return false;
+
+            ++begin;
+            while (cc)
+            {
+                if (impl::isContinuation(*begin))
+                {
+                    ++begin;
+                    cc--;
+                }
+                else
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    template <typename container_t>
+    bool isValidUTF8 (const container_t& c)
+    {
+        return isValidUTF8(c.begin(), c.end());
     }
 }

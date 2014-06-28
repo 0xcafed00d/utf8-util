@@ -5,7 +5,7 @@ namespace utf8
 {
     namespace impl
     {
-        int processLeading (char c, Codepoint_t& initialcp)
+        int processLeading (char c, char32_t& initialcp)
         {
             if ((c & 0x80) == 0)
             {
@@ -53,7 +53,7 @@ namespace utf8
             return (c & 0xc0) == 0x80;
         }
 
-        bool addContinuation (char c, Codepoint_t& cp)
+        bool addContinuation (char c, char32_t& cp)
         {
             if ((c & 0xc0) == 0x80)
             {
@@ -65,27 +65,6 @@ namespace utf8
     }
 
 
-    bool isValidUTF8 (const char* str)
-    {
-        while (*str)
-        {
-            int cc = impl::countContinuations(*str);
-            if (cc < 0)
-                return false;
 
-            str++;
-            while (cc)
-            {
-                if (*str && impl::isContinuation(*str))
-                {
-                    str++;
-                    cc--;
-                }
-                else
-                    return false;
-            }
-        }
-        return true;
-    }
 }
 
