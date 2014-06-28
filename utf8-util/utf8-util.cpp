@@ -53,30 +53,6 @@ namespace utf8
             return (c & 0xc0) == 0x80;
         }
 
-        bool isValidUTF8 (const char* str)
-        {
-            while (*str)
-            {
-                int cc = countContinuations(*str);
-                if (cc < 0)
-                    return false;
-
-                str++;
-                while (cc)
-                {
-                    if (*str && isContinuation(*str))
-                    {
-                        str++;
-                        cc--;
-                    }
-                    else
-                        return false;
-                }
-            }
-            return true;
-        }
-
-
         bool addContinuation (char c, Codepoint_t& cp)
         {
             if ((c & 0xc0) == 0x80)
@@ -85,7 +61,31 @@ namespace utf8
                 return true;
             }
             return false;
-        }        
+        }
+    }
+
+
+    bool isValidUTF8 (const char* str)
+    {
+        while (*str)
+        {
+            int cc = impl::countContinuations(*str);
+            if (cc < 0)
+                return false;
+
+            str++;
+            while (cc)
+            {
+                if (*str && impl::isContinuation(*str))
+                {
+                    str++;
+                    cc--;
+                }
+                else
+                    return false;
+            }
+        }
+        return true;
     }
 }
 

@@ -1,5 +1,7 @@
 #include <iostream>
-#include "utf8-util.h"
+#include <vector>
+#include <algorithm>
+#include "utf8-util/utf8-util.h"
 
 void testUTF8 ()
 {
@@ -20,12 +22,12 @@ void testUTF8 ()
     {
         utf8::Codepoint_t cp = 0;
         char c = s[n];
-        int ncont = utf8::processLeading(c, cp);
+        int ncont = utf8::impl::processLeading(c, cp);
         while (ncont)
         {
             n++;
             ncont--;
-            utf8::addContinuation(s[n], cp);
+            utf8::impl::addContinuation(s[n], cp);
         }
 
         std::cout << std::hex << cp << std::endl;

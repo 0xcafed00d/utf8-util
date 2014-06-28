@@ -7,11 +7,13 @@ namespace utf8
 {
     typedef std::uint32_t Codepoint_t;
 
+    bool isValidUTF8 (const char* str);
+
     namespace impl
     {
         int processLeading (char c, Codepoint_t& initialcp);
         bool addContinuation (char c, Codepoint_t& cp);
-        bool isValidUTF8 (const char* str);
+
 
         template <typename container_t>
         class CodepointIteratorImpl
