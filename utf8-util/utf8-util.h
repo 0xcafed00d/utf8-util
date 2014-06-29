@@ -27,9 +27,18 @@ namespace utf8
                 {
                     private:
                         typename container_t::const_iterator m_itr;
+                        typename container_t::const_iterator m_endItr;
+
+                        void verifyItrInc (typename container_t::const_iterator& i, const char* errmsg)
+                        {
+                            if (i == m_endItr)
+                                throw std::runtime_error(errmsg);
+
+                            ++i;
+                        }
 
                     public:
-                        iterator_impl (const typename container_t::const_iterator& i) : m_itr (i) {}
+                        iterator_impl (const typename container_t::const_iterator& i, const typename container_t::const_iterator& end) : m_itr (i), m_endItr (end) {}
 
                         char32_t operator* ()
                         {
@@ -38,7 +47,7 @@ namespace utf8
                             int ncont = impl::processLeading(*itr, cp, throwOnErr);
                             while (ncont)
                             {
-                                ++itr;
+                                verifyItrInc(itr, "incomplete codepoint at end of input");
                                 ncont--;
                                 impl::addContinuation(*itr, cp, throwOnErr);
                             }
@@ -48,10 +57,10 @@ namespace utf8
                         iterator_impl& operator++()
                         {
                             int ncont = impl::countContinuations(*m_itr, throwOnErr);
-                            ++m_itr;
+                            verifyItrInc(m_itr, "attempt to move past end of input");
                             while (ncont)
                             {
-                                ++m_itr;
+                                verifyItrInc(m_itr, "incomplete codepoint at end of input");
                                 ncont--;
                             }
                             return *this;
@@ -74,12 +83,12 @@ namespace utf8
 
                 iterator_impl begin () const
                 {
-                    return iterator_impl(m_container.cbegin());
+                    return iterator_impl(m_container.cbegin(), m_container.cend());
                 }
 
                 iterator_impl end () const
                 {
-                    return iterator_impl(m_container.cend());
+                    return iterator_impl(m_container.cend(), m_container.cend());
                 }
         };
     }
