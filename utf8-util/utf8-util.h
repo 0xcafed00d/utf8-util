@@ -92,16 +92,17 @@ namespace utf8
     template <typename iterator_t>
     bool isValidUTF8 (iterator_t begin, iterator_t end)
     {
+        int cc = 0;
         while (begin != end)
         {
-            int cc = impl::countContinuations(*begin);
+            cc = impl::countContinuations(*begin);
             if (cc < 0)
                 return false;
 
             ++begin;
             while (cc)
             {
-                if (impl::isContinuation(*begin))
+                if ((begin != end) && impl::isContinuation(*begin))
                 {
                     ++begin;
                     cc--;
@@ -110,7 +111,7 @@ namespace utf8
                     return false;
             }
         }
-        return true;
+        return cc == 0;
     }
 
     template <typename container_t>
