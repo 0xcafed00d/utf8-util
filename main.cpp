@@ -6,7 +6,13 @@
 void testUTF8 ()
 {
     std::string s = "hello world 你好世界";
+    std::string s2 = "你好世界";
     std::vector<unsigned char> vs = {0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x20, 0xe4, 0xbd, 0xa0, 0xe5, 0xa5, 0xbd, 0xe4, 0xb8, 0x96, 0xe7, 0x95, 0x8c};
+
+    auto c = utf8::CodepointIterator(s2).begin();
+    std::cout << *c << std::endl;
+    std::cout << *c << std::endl;
+    std::cout << *c << std::endl;
 
     std::cout << utf8::isValidUTF8(vs) << std::endl;
 
@@ -20,23 +26,7 @@ void testUTF8 ()
     {
         std::cout << cp << std::endl;
     });
-
-    for (size_t n = 0; n < s.size(); n++)
-    {
-        char32_t cp = 0;
-        char c = s[n];
-        int ncont = utf8::impl::processLeading(c, cp);
-        while (ncont)
-        {
-            n++;
-            ncont--;
-            utf8::impl::addContinuation(s[n], cp);
-        }
-
-        std::cout << std::hex << cp << std::endl;
-    }
 }
-
 
 int main()
 {

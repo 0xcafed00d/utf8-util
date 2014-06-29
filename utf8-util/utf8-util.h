@@ -9,9 +9,11 @@ namespace utf8
 
     namespace impl
     {
-        int processLeading (char c, char32_t& initialcp);
-        bool addContinuation (char c, char32_t& cp);
-        int countContinuations (char c);
+        const bool throwOnErr = true;
+
+        int processLeading (char c, char32_t& initialcp, bool throwOnErr = false);
+        bool addContinuation (char c, char32_t& cp, bool throwOnErr = false);
+        int countContinuations (char c, bool throwOnErr = false);
         bool isContinuation (char c);
 
         template <typename container_t>
@@ -21,8 +23,6 @@ namespace utf8
                 const container_t& m_container;
 
             public:
-                typedef char32_t value_typex;
-
                 class iterator_impl
                 {
                     private:
@@ -31,28 +31,29 @@ namespace utf8
                     public:
                         iterator_impl (const typename container_t::const_iterator& i) : m_itr (i) {}
 
-                        value_typex operator* ()
+                        char32_t operator* ()
                         {
+                            auto itr = m_itr;
                             char32_t cp = 0;
-                            int ncont = impl::processLeading(*m_itr, cp);
+                            int ncont = impl::processLeading(*itr, cp, throwOnErr);
                             while (ncont)
                             {
-                                ++m_itr;
+                                ++itr;
                                 ncont--;
-                                impl::addContinuation(*m_itr, cp);
+                                impl::addContinuation(*itr, cp, throwOnErr);
                             }
                             return cp;
                         }
 
                         iterator_impl& operator++()
                         {
+                            int ncont = impl::countContinuations(*m_itr, throwOnErr);
                             ++m_itr;
-                            return *this;
-                        }
-
-                        iterator_impl& operator--()
-                        {
-                            --m_itr;
+                            while (ncont)
+                            {
+                                ++m_itr;
+                                ncont--;
+                            }
                             return *this;
                         }
 
