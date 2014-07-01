@@ -132,10 +132,10 @@ namespace utf8
 
     namespace impl
     {
-        template <typename container_t>
-        char32_t appendContinuation (char32_t codepoint, container_t& container)
+        template <typename value_t>
+        char32_t appendContinuation (char32_t codepoint, value_t& c)
         {
-            container.push_back(static_cast<typename container_t::value_type>((codepoint & 0x3f) | 0x80));
+            c = static_cast<value_t>((codepoint & 0x3f) | 0x80);
             return codepoint >> 6;
         }
     }
@@ -143,11 +143,38 @@ namespace utf8
     template <typename container_t>
     void encodeCodepoint (char32_t codepoint, container_t& container)
     {
+        if (codepoint < 0 || codepoint > 0x7ffff)
+            throw std::runtime_error ("codepoint out of range");
+
         if (codepoint < 0x80)
+        {
             container.push_back(static_cast<typename container_t::value_type>(codepoint));
+        }
         else if (codepoint < 0x800)
         {
-
+            typename container_t::value_type c;
+            codepoint = impl::appendContinuation(codepoint, c);
+            container.push_back(static_cast<typename container_t::value_type>((codepoint & 0x1f) | 0xc0 ));
+        }
+        else if (codepoint < 0x8000)
+        {
+            typename container_t::value_type c[2];
+            codepoint = impl::appendContinuation(codepoint, c[1]);
+            codepoint = impl::appendContinuation(codepoint, c[0]);
+            container.push_back(static_cast<typename container_t::value_type>((codepoint & 0x0f) | 0xe0));
+            container.push_back(c[0]);
+            container.push_back(c[1]);
+        }
+        else // codepoint < 0x80000
+        {
+            typename container_t::value_type c[3];
+            codepoint = impl::appendContinuation(codepoint, c[2]);
+            codepoint = impl::appendContinuation(codepoint, c[1]);
+            codepoint = impl::appendContinuation(codepoint, c[0]);
+            container.push_back(static_cast<typename container_t::value_type>((codepoint & 0x07) | 0xf0));
+            container.push_back(c[0]);
+            container.push_back(c[1]);
+            container.push_back(c[2]);
         }
     }
 }
