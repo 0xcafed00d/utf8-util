@@ -4,6 +4,11 @@
 #include <assert.h>
 #include "utf8-util/utf8-util.h"
 
+void examples ()
+{
+
+}
+
 void testUTF8 ()
 {
     std::string s = "hello world 你好世界";
@@ -64,6 +69,7 @@ void testUTF8 ()
 
 int main()
 {
+    examples();
     testUTF8();
     return 0;
 }
