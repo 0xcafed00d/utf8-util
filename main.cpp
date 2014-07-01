@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <assert.h>
 #include "utf8-util/utf8-util.h"
 
 void testUTF8 ()
@@ -20,6 +21,21 @@ void testUTF8 ()
         ch = 0;
     }
 
+{
+    std::string out;
+    for (char32_t n = 32; n < 0x110000; n++)
+    {
+        //std::cout << n  << std::endl;
+        utf8::encodeCodepoint(n, out);
+        auto c = utf8::CodepointIterator(out).begin();
+        if (n != *c)
+        {
+            std::cout << n << " " << *c << std::endl;
+            assert(false);
+        }
+        out.clear();
+    }
+}
 
     auto c = utf8::CodepointIterator(s2).begin();
 
