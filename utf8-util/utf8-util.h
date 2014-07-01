@@ -129,4 +129,25 @@ namespace utf8
     {
         return isValidUTF8(c.begin(), c.end());
     }
+
+    namespace impl
+    {
+        template <typename container_t>
+        char32_t appendContinuation (char32_t codepoint, container_t& container)
+        {
+            container.push_back(static_cast<typename container_t::value_type>((codepoint & 0x3f) | 0x80));
+            return codepoint >> 6;
+        }
+    }
+
+    template <typename container_t>
+    void encodeCodepoint (char32_t codepoint, container_t& container)
+    {
+        if (codepoint < 0x80)
+            container.push_back(static_cast<typename container_t::value_type>(codepoint));
+        else if (codepoint < 0x800)
+        {
+
+        }
+    }
 }
