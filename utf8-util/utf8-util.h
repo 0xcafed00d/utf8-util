@@ -143,7 +143,7 @@ namespace utf8
     template <typename container_t>
     void encodeCodepoint (char32_t codepoint, container_t& container)
     {
-        if (codepoint < 0 || codepoint > 0x10ffff)
+        if (codepoint > 0x10ffff)
             throw std::runtime_error ("codepoint out of range");
 
         if (codepoint < 0x80)
